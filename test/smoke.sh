@@ -7,26 +7,26 @@ b="$root/bin/b"
 export B_DRY=1
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
-"$b" list | grep -q '^l makemore'
+"$b" list | grep -q '^s makemore'
 for f in $(cd "$root/recipes" && find . -name '*.sh' ! -name '_template.sh'); do
   words=$(printf '%s' "${f#./}" | sed 's/\.sh$//' | tr / ' ')
-  # shellcheck disable=SC2086  # split "l makemore" into words on purpose
+  # shellcheck disable=SC2086  # split "s makemore" into words on purpose
   out=$("$b" up $words 2>&1); grep -q '\[dry\]' <<<"$out" || { echo "FAIL up $words"; exit 1; }
   # shellcheck disable=SC2086
   "$b" down $words >/dev/null 2>&1
 done
 
-# l karpathy: first queue item reaches VLC, the session reaches Chrome
-out=$("$b" l karpathy 2>&1)
+# s karpathy: first queue item reaches VLC, the session reaches Chrome
+out=$("$b" s karpathy 2>&1)
 grep -q 'VMj-3S1tku0' <<<"$out"         || { echo "FAIL vlc queue"; exit 1; }
 grep -q -- '--new-window' <<<"$out"     || { echo "FAIL chrome"; exit 1; }
 grep -q 'working-directory=' <<<"$out"  || { echo "FAIL ghostty"; exit 1; }
 
-# l makemore: id in the queue resolves to the local file, note gets its title
+# s makemore: id in the queue resolves to the local file, note gets its title
 mkdir -p "$tmp/videos"
 touch "$tmp/videos/Building makemore Part 4： Becoming a Backprop Ninja [q8SA3rM6ckI].webm"
 out=$(cd "$root" && BORING_HOME="$root" bash -c '
-  . lib/blocks.sh; . recipes/l/makemore.sh; VIDEO_DIR='"'$tmp/videos'"'; up' 2>&1)
+  . lib/blocks.sh; . recipes/s/makemore.sh; VIDEO_DIR='"'$tmp/videos'"'; up' 2>&1)
 grep -q 'Backprop Ninja \[q8SA3rM6ckI\].webm' <<<"$out"            || { echo "FAIL makemore video"; exit 1; }
 grep -q 'notes: Karpathy, Zero To Hero / Building makemore Part 4: Becoming a Backprop Ninja' <<<"$out" \
   || { echo "FAIL makemore note"; exit 1; }

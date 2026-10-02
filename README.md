@@ -10,10 +10,10 @@ One keystroke to a ready workspace. Plain bash + AppleScript, stock macOS,
 zero required deps. The hard part of a habit is starting; this deletes it.
 
 ```
-b l makemore       # Ghostty in ~/s/karpathy/makeless running Jupyter, next
+b s makemore       # Ghostty in ~/s/karpathy/makeless running Jupyter, next
                    # lecture from ~/s/karpathy/videos in VLC, its Apple Note
                    # in "Karpathy, Zero To Hero", Slack/X gone, Focus on
-b down l makemore  # tear down
+b down s makemore  # tear down
 b next makemore    # mark the lecture watched; next run plays the next one
 b kill         # just nuke distractions
 ```
@@ -23,9 +23,9 @@ b kill         # just nuke distractions
 ```sh
 git clone https://github.com/whyczz/boring-env ~/code/boring-env
 ln -s ~/code/boring-env/bin/b ~/.local/bin/b     # or anywhere on PATH
-B_DRY=1 b l makemore                             # dry run: prints, opens nothing
-~/code/boring-env/alfred/build.sh                # install Alfred workflow (`b` keyword, ⌃⌥L)
-b l makemore                                      # the real thing
+B_DRY=1 b s makemore                             # dry run: prints, opens nothing
+~/code/boring-env/alfred/build.sh                # install Alfred workflow (`b` keyword, ⌃⌥S)
+b s makemore                                      # the real thing
 ```
 
 First real run: macOS asks "allow Terminal/Alfred to control Notes / Chrome /
@@ -42,7 +42,7 @@ Optional bits (each block skips itself if missing):
 |---|---|
 | `bin/b` | the CLI |
 | `lib/blocks.sh` | the Lego: one function per action |
-| `recipes/l/*.sh` | one recipe per workspace, grouped by letter (`l` = learn): `recipes/l/makemore.sh` is `b l makemore`. Each defines `up()` / `down()` |
+| `recipes/s/*.sh` | one recipe per workspace, grouped by letter (`s` = study): `recipes/s/makemore.sh` is `b s makemore`. Each defines `up()` / `down()` |
 | `sessions/*.txt` | Chrome tab lists, one URL per line (Session Buddy replacement) |
 | `queues/*.txt` | "what's next" lists, top line plays next |
 | `distractions.txt` | `app:Slack`, `tab:x.com` lines for `b kill` |
@@ -67,7 +67,7 @@ Optional bits (each block skips itself if missing):
 | `kill_distractions` | apply `distractions.txt` |
 | `osa 'SCRIPT' ARGS...` | raw AppleScript escape hatch (`on run argv`) |
 
-New recipe: `b new l deepwork` copies `recipes/_template.sh` to `recipes/l/deepwork.sh` and opens it.
+New recipe: `b new s deepwork` copies `recipes/_template.sh` to `recipes/s/deepwork.sh` and opens it.
 
 Videos: `video_find ID DIR` matches a YouTube id (or any piece of the filename)
 in DIR, so queues can list ids and you can rename files freely as long as the
@@ -88,7 +88,7 @@ yt-dlp -o '~/Videos/learn/%(title)s.%(ext)s' 'https://www.youtube.com/watch?v=VM
 
 - `open -na Ghostty` starts a fresh Ghostty process per call (extra dock icon).
   Harmless; if it bugs you, swap `term_at` for an AppleScript keystroke version.
-- Re-running `b l makemore` opens a second set of windows. Use `b down` first.
+- Re-running `b s makemore` opens a second set of windows. Use `b down` first.
 - Alfred runs with a bare PATH; `b` adds `/opt/homebrew/bin` itself.
 
 ## Test

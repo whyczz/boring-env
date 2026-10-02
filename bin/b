@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 # b: one keystroke to a ready workspace.
 #
-#   b l makemore       bring up recipes/l/makemore.sh (same as `b up l makemore`)
-#   b down l makemore  tear it down
+#   b s makemore       bring up recipes/s/makemore.sh (same as `b up s makemore`)
+#   b down s makemore  tear it down
 #   b kill             quit distractions (distractions.txt)
 #   b next makemore    mark the top of queues/makemore.txt as watched
 #   b list             list recipes
-#   b new l NAME       scaffold recipes/l/NAME.sh from the template
-#   b edit l makemore  open a recipe in $EDITOR
+#   b new s NAME       scaffold recipes/s/NAME.sh from the template
+#   b edit s makemore  open a recipe in $EDITOR
 #   b alfred           Alfred Script Filter JSON (used by the workflow)
 #
-# B_DRY=1 b l makemore  print what would happen, touch nothing
+# B_DRY=1 b s makemore  print what would happen, touch nothing
 #
-# Recipes nest by folder: recipes/l/makemore.sh is `b l makemore`
-# (l = learn). Words after the command are joined with / to find the file.
+# Recipes nest by folder: recipes/s/makemore.sh is `b s makemore`
+# (s = study). Words after the command are joined with / to find the file.
 set -euo pipefail
 
 # resolve the repo root even when b is symlinked into ~/.local/bin
@@ -35,7 +35,7 @@ PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 # shellcheck disable=SC1091
 [ -f "$BORING_HOME/local.sh" ] && . "$BORING_HOME/local.sh"
 
-# rid WORD...: recipe id, words joined by / ("l makemore" -> "l/makemore")
+# rid WORD...: recipe id, words joined by / ("s makemore" -> "s/makemore")
 rid() { local IFS=/; printf '%s' "$*"; }
 
 # all recipe ids, sorted, template excluded
@@ -110,13 +110,13 @@ main() {
   local c=${1:-}; shift || true
   case $c in
     ""|-h|--help|help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//' ;;
-    up)     [ $# -ge 1 ] || die "usage: b up l NAME";   cmd_up "$(rid "$@")" ;;
-    down)   [ $# -ge 1 ] || die "usage: b down l NAME"; cmd_down "$(rid "$@")" ;;
+    up)     [ $# -ge 1 ] || die "usage: b up s NAME";   cmd_up "$(rid "$@")" ;;
+    down)   [ $# -ge 1 ] || die "usage: b down s NAME"; cmd_down "$(rid "$@")" ;;
     kill)   kill_distractions ;;
     next)   [ $# -ge 1 ] || die "usage: b next QUEUE"; queue_done "$1" ;;
     list|ls) cmd_list ;;
-    new)    [ $# -ge 1 ] || die "usage: b new l NAME";  cmd_new "$(rid "$@")" ;;
-    edit)   [ $# -ge 1 ] || die "usage: b edit l NAME"; cmd_edit "$(rid "$@")" ;;
+    new)    [ $# -ge 1 ] || die "usage: b new s NAME";  cmd_new "$(rid "$@")" ;;
+    edit)   [ $# -ge 1 ] || die "usage: b edit s NAME"; cmd_edit "$(rid "$@")" ;;
     alfred) cmd_alfred ;;
     *)      cmd_up "$(rid "$c" "$@")" ;;
   esac
