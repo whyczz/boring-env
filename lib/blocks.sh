@@ -143,11 +143,27 @@ vlc_play() {
     run open "$src"; return 0
   fi
   log "vlc: $src"
-  if [ -n "${B_DRY:-}" ]; then
-    run "$VLC_BIN" --start-time="$start" "$src"
-  else
-    nohup "$VLC_BIN" --start-time="$start" "$src" >/dev/null 2>&1 &
-  fi
+  # AppleScript, not the binary: a running VLC plays it instead of a second
+  # instance spawning next to it.
+  osa 'on run argv
+  set src to item 1 of argv
+  set t to (item 2 of argv) as integer
+  tell application "VLC"
+    if src contains "://" then
+      OpenURL src
+    else
+      open (POSIX file src)
+    end if
+    activate
+    if t > 0 then
+      repeat 20 times
+        if playing then exit repeat
+        delay 0.25
+      end repeat
+      set current time to t
+    end if
+  end tell
+end run' "$src" "$start"
   settle
 }
 
@@ -231,7 +247,13 @@ on run argv
   set fname to item 3 of argv
   tell application "Notes"
     if fname is "" then
-      set hits to (notes whose name is t)
+      -- skip notes sitting in Recently Deleted (their container errors out)
+      set hits to {}
+      repeat with n in (notes whose name is t)
+        try
+          if name of container of n is not "Recently Deleted" then set end of hits to contents of n
+        end try
+      end repeat
       set dest to missing value
     else
       set dest to missing value
@@ -268,6 +290,15 @@ aero_workspace() {
   if [ -z "${B_DRY:-}" ] && ! has aerospace; then log "aerospace not installed, skipping"; return 0; fi
   log "aerospace workspace $1"
   run aerospace workspace "$1"
+}
+
+# aero_pull NAME: move the focused window to workspace NAME and follow it.
+# Activating an app whose window lives elsewhere (VLC, Notes) makes AeroSpace
+# jump to that window's workspace; call this right after to drag it back.
+aero_pull() {
+  if [ -z "${B_DRY:-}" ] && ! has aerospace; then return 0; fi
+  log "aerospace pull focused window -> $1"
+  run aerospace move-node-to-workspace --focus-follows-window "$1"
 }
 
 # aero_layout LAYOUT...: e.g. `aero_layout tiles horizontal` on focused window

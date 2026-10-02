@@ -34,7 +34,7 @@ System Events". Click Allow once. That's the TCC tax.
 Optional bits (each block skips itself if missing):
 - **Focus mode**: in Shortcuts.app make `Focus On` (Set Focus → Do Not Disturb → On)
   and `Focus Off`. Names configurable in `local.sh`.
-- **AeroSpace**: `aero_workspace L` jumps there first so new windows land on it.
+- **AeroSpace**: `aero_workspace L` jumps there first so new windows land on it; `aero_pull L` after an app that already has a window elsewhere (VLC, Notes) drags it over.
 
 ## Layout
 
@@ -57,12 +57,12 @@ Optional bits (each block skips itself if missing):
 | `chrome_window URL...` | new Chrome window with those tabs |
 | `chrome_session NAME` | `sessions/NAME.txt` as a window |
 | `chrome_close_matching TEXT...` | close tabs whose URL contains TEXT |
-| `vlc_play SRC [START_SEC]` | play file/URL in VLC |
+| `vlc_play SRC [START_SEC]` | play file/URL in the running VLC (no second instance) |
 | `queue_next NAME` | print top of `queues/NAME.txt` |
 | `notes_open TITLE [--stamp] [--folder NAME]` | find or create an Apple Note, optionally in a (nested) folder, optionally with a dated heading |
 | `video_find KEY [DIR]`, `video_title FILE` | resolve a queue id to a local video, derive a note title |
 | `app_open APP` / `app_quit APP...` | launch / politely quit |
-| `aero_workspace NAME`, `aero_layout ...` | AeroSpace |
+| `aero_workspace NAME`, `aero_pull NAME`, `aero_layout ...` | AeroSpace |
 | `focus_on` / `focus_off` | run your Focus Shortcuts |
 | `kill_distractions` | apply `distractions.txt` |
 | `osa 'SCRIPT' ARGS...` | raw AppleScript escape hatch (`on run argv`) |

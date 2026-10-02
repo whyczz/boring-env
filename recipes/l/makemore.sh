@@ -18,9 +18,11 @@ up() {
   local video
   video=$(video_find "$(queue_next makemore)" "$VIDEO_DIR")
   vlc_play "$video"
+  aero_pull L    # activating VLC jumps to its window's workspace; drag it here
 
   # C: find or create the note for this lecture in the Karpathy folder
   notes_open "$(video_title "$video")" --folder "$NOTES_FOLDER" --stamp
+  aero_pull L
 
   focus_on
 }
