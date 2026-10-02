@@ -14,7 +14,11 @@
 : "${FOCUS_ON_SHORTCUT:=Focus On}"          # names of Apple Shortcuts you create
 : "${FOCUS_OFF_SHORTCUT:=Focus Off}"
 : "${SETTLE:=0.4}"                          # seconds to let a window appear
-: "${STUDY_WS:=S}"                          # AeroSpace workspace for study recipes (alt-s)
+: "${STUDY_WS:=auto}"                       # study workspace: a letter pins it, auto = first empty
+# auto tries these in order; all have an alt-<key> binding in AeroSpace's
+# default config (H J K L are focus keys, so they're out)
+: "${AERO_CANDIDATES:=S G I N O P Q R T U V W X Y Z A B C D E F M 1 2 3 4 5 6 7 8 9}"
+: "${AERO_STATE:=${XDG_CACHE_HOME:-$HOME/.cache}/boring-env/aero.ws}"  # last auto pick
 
 # --- plumbing -------------------------------------------------------------
 
@@ -34,6 +38,14 @@ osa() {
     return 0
   fi
   printf '%s\n' "$script" | osascript - "$@"
+}
+
+# notify MSG [DETAIL]: macOS banner (Alfred runs have no terminal to read)
+notify() {
+  log "$1${2:+ — $2}"
+  osa 'on run argv
+  display notification (item 2 of argv) with title "boring-env" subtitle (item 1 of argv)
+end run' "$1" "${2:-}"
 }
 
 settle() { [ -n "${B_DRY:-}" ] || sleep "$SETTLE"; }
@@ -286,20 +298,50 @@ end run' "$title" "$stamp" "$folder"
 
 # --- window manager: AeroSpace ---------------------------------------------
 
-# aero_workspace NAME: jump to an AeroSpace workspace so new windows land there
-aero_workspace() {
-  if [ -z "${B_DRY:-}" ] && ! has aerospace; then log "aerospace not installed, skipping"; return 0; fi
-  log "aerospace workspace $1"
-  run aerospace workspace "$1"
+# aero_pick_empty: print a workspace with no windows. Order: the first
+# candidate (S), then last time's pick (so it stays the same letter while it's
+# free), then the rest of AERO_CANDIDATES. All busy -> the first candidate.
+aero_pick_empty() {
+  local first last ws
+  # shellcheck disable=SC2086  # split the candidate list on purpose
+  set -- $AERO_CANDIDATES
+  first=$1
+  if [ -n "${B_DRY:-}" ] || ! has aerospace; then printf '%s' "$first"; return 0; fi
+  last=$(cat "$AERO_STATE" 2>/dev/null || true)
+  for ws in "$first" ${last:+"$last"} "$@"; do
+    if [ "$(aerospace list-windows --workspace "$ws" --count 2>/dev/null)" = 0 ]; then
+      printf '%s' "$ws"; return 0
+    fi
+  done
+  log "no empty workspace among: $AERO_CANDIDATES"
+  printf '%s' "$first"
 }
 
-# aero_pull NAME: move the focused window to workspace NAME and follow it.
-# Activating an app whose window lives elsewhere (VLC, Notes) makes AeroSpace
-# jump to that window's workspace; call this right after to drag it back.
+# aero_workspace NAME|auto: jump to an AeroSpace workspace so new windows land
+# there. auto picks an empty one and pops a notification saying which.
+# Sets AERO_WS, which aero_pull uses by default.
+aero_workspace() {
+  if [ -z "${B_DRY:-}" ] && ! has aerospace; then log "aerospace not installed, skipping"; return 0; fi
+  AERO_WS=$1
+  if [ "$1" = auto ]; then
+    AERO_WS=$(aero_pick_empty)
+    [ -n "${B_DRY:-}" ] || { mkdir -p "$(dirname "$AERO_STATE")"; printf '%s\n' "$AERO_WS" > "$AERO_STATE"; }
+  fi
+  log "aerospace workspace $AERO_WS"
+  run aerospace workspace "$AERO_WS"
+  [ "$1" = auto ] && notify "Workspace $AERO_WS" "⌥$AERO_WS gets you back here"
+  return 0
+}
+
+# aero_pull [NAME]: move the focused window to NAME (default: the workspace
+# aero_workspace picked) and follow it. Activating an app whose window lives
+# elsewhere (VLC, Notes) makes AeroSpace jump there; call this right after.
 aero_pull() {
+  local ws=${1:-${AERO_WS:-}}
+  [ -n "$ws" ] || return 0
   if [ -z "${B_DRY:-}" ] && ! has aerospace; then return 0; fi
-  log "aerospace pull focused window -> $1"
-  run aerospace move-node-to-workspace --focus-follows-window "$1"
+  log "aerospace pull focused window -> $ws"
+  run aerospace move-node-to-workspace --focus-follows-window "$ws"
 }
 
 # aero_layout LAYOUT...: e.g. `aero_layout tiles horizontal` on focused window

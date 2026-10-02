@@ -9,7 +9,7 @@ NOTES_FOLDER="Karpathy, Zero To Hero"
 
 up() {
   kill_distractions
-  aero_workspace "$STUDY_WS"   # S by default (alt-s)
+  aero_workspace "$STUDY_WS"   # auto: first empty one, banner says which
 
   # A: Ghostty in the repo, Jupyter server running (Ctrl-C drops you to a shell)
   term_at "$CODE_DIR" "uv run --with jupyter jupyter lab"
@@ -18,11 +18,11 @@ up() {
   local video
   video=$(video_find "$(queue_next makemore)" "$VIDEO_DIR")
   vlc_play "$video"
-  aero_pull "$STUDY_WS"    # activating VLC jumps to its window's workspace; drag it here
+  aero_pull    # activating VLC jumps to its window's workspace; drag it here
 
   # C: find or create the note for this lecture in the Karpathy folder
   notes_open "$(video_title "$video")" --folder "$NOTES_FOLDER" --stamp
-  aero_pull "$STUDY_WS"
+  aero_pull
 
   focus_on
 }

@@ -7,13 +7,13 @@ LEARN_DIR=~/code/learn
 
 up() {
   kill_distractions                    # b kill, but automatic
-  aero_workspace "$STUDY_WS"                   # new windows land on AeroSpace workspace S (alt-s)
+  aero_workspace "$STUDY_WS"                   # empty AeroSpace workspace; banner says which
   term_at "$LEARN_DIR"                 # Ghostty, cd'd in
   chrome_session learn                 # tabs from sessions/learn.txt
   vlc_play "$(queue_next karpathy)"    # top of queues/karpathy.txt
-  aero_pull "$STUDY_WS"                # drag VLC over if its window lived elsewhere
+  aero_pull                # drag VLC over if its window lived elsewhere
   notes_open "Learning Log" --stamp    # Apple Note with today's heading
-  aero_pull "$STUDY_WS"
+  aero_pull
   focus_on                             # Shortcut "Focus On" -> Do Not Disturb
 }
 

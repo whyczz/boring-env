@@ -34,7 +34,7 @@ System Events". Click Allow once. That's the TCC tax.
 Optional bits (each block skips itself if missing):
 - **Focus mode**: in Shortcuts.app make `Focus On` (Set Focus → Do Not Disturb → On)
   and `Focus Off`. Names configurable in `local.sh`.
-- **AeroSpace**: study recipes go to workspace `S` (alt-s), set by `STUDY_WS` (override in `local.sh`). `aero_workspace "$STUDY_WS"` jumps there first so new windows land on it; `aero_pull "$STUDY_WS"` after an app that already has a window elsewhere (VLC, Notes) drags it over. Use a letter your AeroSpace config binds: the default config has no `alt-l` workspace (alt-l is focus right).
+- **AeroSpace**: study recipes grab the first **empty** workspace (`STUDY_WS=auto`, trying S, then last time's letter, then `AERO_CANDIDATES`) and pop a macOS banner like "Workspace G — ⌥G gets you back here". Pin one with `STUDY_WS=G` in `local.sh`. `aero_pull` after an app that already has a window elsewhere (VLC, Notes) drags it over.
 
 ## Layout
 
@@ -62,7 +62,8 @@ Optional bits (each block skips itself if missing):
 | `notes_open TITLE [--stamp] [--folder NAME]` | find or create an Apple Note, optionally in a (nested) folder, optionally with a dated heading |
 | `video_find KEY [DIR]`, `video_title FILE` | resolve a queue id to a local video, derive a note title |
 | `app_open APP` / `app_quit APP...` | launch / politely quit |
-| `aero_workspace NAME`, `aero_pull NAME`, `aero_layout ...` | AeroSpace |
+| `aero_workspace NAME\|auto`, `aero_pull [NAME]`, `aero_layout ...` | AeroSpace (auto = first empty workspace) |
+| `notify MSG [DETAIL]` | macOS notification banner |
 | `focus_on` / `focus_off` | run your Focus Shortcuts |
 | `kill_distractions` | apply `distractions.txt` |
 | `osa 'SCRIPT' ARGS...` | raw AppleScript escape hatch (`on run argv`) |
