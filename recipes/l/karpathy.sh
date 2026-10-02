@@ -7,7 +7,7 @@ LEARN_DIR=~/code/learn
 
 up() {
   kill_distractions                    # b kill, but automatic
-  aero_workspace L                     # new windows land on AeroSpace workspace L
+  aero_workspace S                     # new windows land on AeroSpace workspace S (alt-s)
   term_at "$LEARN_DIR"                 # Ghostty, cd'd in
   chrome_session learn                 # tabs from sessions/learn.txt
   vlc_play "$(queue_next karpathy)"    # top of queues/karpathy.txt

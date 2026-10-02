@@ -34,7 +34,7 @@ System Events". Click Allow once. That's the TCC tax.
 Optional bits (each block skips itself if missing):
 - **Focus mode**: in Shortcuts.app make `Focus On` (Set Focus → Do Not Disturb → On)
   and `Focus Off`. Names configurable in `local.sh`.
-- **AeroSpace**: `aero_workspace L` jumps there first so new windows land on it; `aero_pull L` after an app that already has a window elsewhere (VLC, Notes) drags it over.
+- **AeroSpace**: `aero_workspace S` jumps there first so new windows land on it; `aero_pull S` after an app that already has a window elsewhere (VLC, Notes) drags it over.
 
 ## Layout
 
