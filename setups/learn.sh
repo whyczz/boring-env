@@ -6,7 +6,7 @@
 LEARN_DIR=~/code/learn
 
 up() {
-  kill_distractions                    # ws kill, but automatic
+  kill_distractions                    # b kill, but automatic
   aero_workspace L                     # new windows land on AeroSpace workspace L
   term_at "$LEARN_DIR"                 # Ghostty, cd'd in
   chrome_session learn                 # tabs from sessions/learn.txt
@@ -18,5 +18,5 @@ up() {
 down() {
   app_quit VLC
   focus_off
-  log "watched it all? run: ws next karpathy"
+  log "watched it all? run: b next karpathy"
 }

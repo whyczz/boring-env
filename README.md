@@ -10,20 +10,20 @@ One keystroke to a ready workspace. Plain bash + AppleScript, stock macOS,
 zero required deps. The hard part of a habit is starting; this deletes it.
 
 ```
-ws learn        # Ghostty in ~/code/learn, Chrome tabs, next lecture in VLC,
+b learn        # Ghostty in ~/code/learn, Chrome tabs, next lecture in VLC,
                 # Apple Note stamped with today, Slack/X gone, Focus on
-ws down learn   # tear down
-ws next karpathy  # mark the lecture watched; next run plays the next one
-ws kill         # just nuke distractions
+b down learn   # tear down
+b next karpathy  # mark the lecture watched; next run plays the next one
+b kill         # just nuke distractions
 ```
 
 ## Install (2 min)
 
 ```sh
 git clone https://github.com/whyczz/boring-env ~/code/boring-env
-ln -s ~/code/boring-env/bin/ws ~/.local/bin/ws     # or anywhere on PATH
-WS_DRY=1 ws learn                                  # dry run: prints, opens nothing
-ws learn                                           # the real thing
+ln -s ~/code/boring-env/bin/b ~/.local/bin/b     # or anywhere on PATH
+B_DRY=1 b learn                                  # dry run: prints, opens nothing
+b learn                                           # the real thing
 ```
 
 First real run: macOS asks "allow Terminal/Alfred to control Notes / Chrome /
@@ -38,12 +38,12 @@ Optional bits (each block skips itself if missing):
 
 | path | what |
 |---|---|
-| `bin/ws` | the CLI |
+| `bin/b` | the CLI |
 | `lib/blocks.sh` | the Lego: one function per action |
 | `setups/*.sh` | one file per workspace, each defines `up()` / `down()` |
 | `sessions/*.txt` | Chrome tab lists, one URL per line (Session Buddy replacement) |
 | `queues/*.txt` | "what's next" lists, top line plays next |
-| `distractions.txt` | `app:Slack`, `tab:x.com` lines for `ws kill` |
+| `distractions.txt` | `app:Slack`, `tab:x.com` lines for `b kill` |
 | `local.sh` | per-machine overrides, gitignored (see `local.sh.example`) |
 | `alfred/` | how to wire Alfred |
 
@@ -64,7 +64,7 @@ Optional bits (each block skips itself if missing):
 | `kill_distractions` | apply `distractions.txt` |
 | `osa 'SCRIPT' ARGS...` | raw AppleScript escape hatch (`on run argv`) |
 
-New workspace: `ws new deepwork` copies `setups/_template.sh` and opens it.
+New workspace: `b new deepwork` copies `setups/_template.sh` and opens it.
 
 ## Sidebar: VLC + YouTube
 
@@ -81,8 +81,8 @@ yt-dlp -o '~/Videos/learn/%(title)s.%(ext)s' 'https://www.youtube.com/watch?v=VM
 
 - `open -na Ghostty` starts a fresh Ghostty process per call (extra dock icon).
   Harmless; if it bugs you, swap `term_at` for an AppleScript keystroke version.
-- Re-running `ws learn` opens a second set of windows. Use `ws down` first.
-- Alfred runs with a bare PATH; `ws` adds `/opt/homebrew/bin` itself.
+- Re-running `b learn` opens a second set of windows. Use `b down` first.
+- Alfred runs with a bare PATH; `b` adds `/opt/homebrew/bin` itself.
 
 ## Test
 

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# ws: one keystroke to a ready workspace.
+# b: one keystroke to a ready workspace.
 #
-#   ws learn            bring up setups/learn.sh (same as `ws up learn`)
-#   ws down learn       tear it down
-#   ws kill             quit distractions (distractions.txt)
-#   ws next karpathy    mark the top of queues/karpathy.txt as watched
-#   ws list             list setups
-#   ws new NAME         scaffold setups/NAME.sh from the template
-#   ws edit NAME        open a setup in $EDITOR
-#   ws alfred           Alfred Script Filter JSON (used by the workflow)
+#   b learn            bring up setups/learn.sh (same as `b up learn`)
+#   b down learn       tear it down
+#   b kill             quit distractions (distractions.txt)
+#   b next karpathy    mark the top of queues/karpathy.txt as watched
+#   b list             list setups
+#   b new NAME         scaffold setups/NAME.sh from the template
+#   b edit NAME        open a setup in $EDITOR
+#   b alfred           Alfred Script Filter JSON (used by the workflow)
 #
-# WS_DRY=1 ws learn     print what would happen, touch nothing
+# B_DRY=1 b learn     print what would happen, touch nothing
 set -euo pipefail
 
-# resolve the repo root even when ws is symlinked into ~/.local/bin
+# resolve the repo root even when b is symlinked into ~/.local/bin
 src=${BASH_SOURCE[0]}
 while [ -L "$src" ]; do
   dir=$(cd -P "$(dirname "$src")" && pwd)
@@ -34,7 +34,7 @@ PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 
 setup_file() {
   local f="$BORING_HOME/setups/$1.sh"
-  [ -f "$f" ] || die "no setup '$1' (try: ws list)"
+  [ -f "$f" ] || die "no setup '$1' (try: b list)"
   printf '%s' "$f"
 }
 
@@ -100,13 +100,13 @@ main() {
   local c=${1:-}; shift || true
   case $c in
     ""|-h|--help|help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
-    up)     [ $# -ge 1 ] || die "usage: ws up NAME";   cmd_up "$1" ;;
-    down)   [ $# -ge 1 ] || die "usage: ws down NAME"; cmd_down "$1" ;;
+    up)     [ $# -ge 1 ] || die "usage: b up NAME";   cmd_up "$1" ;;
+    down)   [ $# -ge 1 ] || die "usage: b down NAME"; cmd_down "$1" ;;
     kill)   kill_distractions ;;
-    next)   [ $# -ge 1 ] || die "usage: ws next QUEUE"; queue_done "$1" ;;
+    next)   [ $# -ge 1 ] || die "usage: b next QUEUE"; queue_done "$1" ;;
     list|ls) cmd_list ;;
-    new)    [ $# -ge 1 ] || die "usage: ws new NAME";  cmd_new "$1" ;;
-    edit)   [ $# -ge 1 ] || die "usage: ws edit NAME"; cmd_edit "$1" ;;
+    new)    [ $# -ge 1 ] || die "usage: b new NAME";  cmd_new "$1" ;;
+    edit)   [ $# -ge 1 ] || die "usage: b edit NAME"; cmd_edit "$1" ;;
     alfred) cmd_alfred ;;
     *)      cmd_up "$c" ;;
   esac

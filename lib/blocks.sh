@@ -3,10 +3,10 @@
 # Stock macOS only: bash 3.2, `open`, `osascript`. No yq, no brew deps
 # (aerospace and VLC are optional and skipped if missing).
 #
-# WS_DRY=1 prints every side effect instead of doing it. Handy for testing
+# B_DRY=1 prints every side effect instead of doing it. Handy for testing
 # a setup without spawning 9 windows.
 
-: "${BORING_HOME:?BORING_HOME not set (source via bin/ws)}"
+: "${BORING_HOME:?BORING_HOME not set (source via bin/b)}"
 : "${CHROME_APP:=Google Chrome}"
 : "${CHROME_PROFILE:=}"                     # e.g. "Profile 1"; empty = default
 : "${GHOSTTY_APP:=Ghostty}"
@@ -17,25 +17,25 @@
 
 # --- plumbing -------------------------------------------------------------
 
-log() { printf '\033[2m[ws]\033[0m %s\n' "$*" >&2; }
-die() { printf '[ws] error: %s\n' "$*" >&2; exit 1; }
+log() { printf '\033[2m[b]\033[0m %s\n' "$*" >&2; }
+die() { printf '[b] error: %s\n' "$*" >&2; exit 1; }
 
 # run CMD...: execute, or print in dry mode
 run() {
-  if [ -n "${WS_DRY:-}" ]; then printf '[dry] %s\n' "$*"; else "$@"; fi
+  if [ -n "${B_DRY:-}" ]; then printf '[dry] %s\n' "$*"; else "$@"; fi
 }
 
 # osa SCRIPT [ARGS...]: AppleScript via stdin; args land in `on run argv`
 osa() {
   local script=$1; shift
-  if [ -n "${WS_DRY:-}" ]; then
+  if [ -n "${B_DRY:-}" ]; then
     printf '[dry] osascript (%s) <<%s\n' "$*" "$(printf '%s' "$script" | head -1)"
     return 0
   fi
   printf '%s\n' "$script" | osascript - "$@"
 }
 
-settle() { [ -n "${WS_DRY:-}" ] || sleep "$SETTLE"; }
+settle() { [ -n "${B_DRY:-}" ] || sleep "$SETTLE"; }
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
@@ -47,7 +47,7 @@ expand() { case $1 in "~"|"~/"*) printf '%s%s' "$HOME" "${1#\~}" ;; *) printf '%
 lines() { [ -f "$1" ] || die "no such file: $1"; grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$1"; }
 
 app_running() {
-  [ -n "${WS_DRY:-}" ] && return 1
+  [ -n "${B_DRY:-}" ] && return 1
   [ "$(osascript -e "application \"$1\" is running" 2>/dev/null)" = "true" ]
 }
 
@@ -60,7 +60,7 @@ app_open() { log "open $1"; run open -a "$1"; }
 app_quit() {
   local a
   for a in "$@"; do
-    if [ -n "${WS_DRY:-}" ] || app_running "$a"; then
+    if [ -n "${B_DRY:-}" ] || app_running "$a"; then
       log "quit $a"
       osa 'on run argv
   tell application (item 1 of argv) to quit
@@ -75,7 +75,7 @@ end run' "$a"
 # (drops you into your shell after CMD exits).
 term_at() {
   local dir; dir=$(expand "$1"); shift
-  [ -n "${WS_DRY:-}" ] || [ -d "$dir" ] || { log "creating $dir"; mkdir -p "$dir"; }
+  [ -n "${B_DRY:-}" ] || [ -d "$dir" ] || { log "creating $dir"; mkdir -p "$dir"; }
   log "ghostty @ $dir"
   if [ $# -gt 0 ]; then
     run open -na "$GHOSTTY_APP" --args --working-directory="$dir" \
@@ -111,7 +111,7 @@ chrome_session() {
 # any PATTERN (e.g. x.com reddit.com). Distraction killer.
 chrome_close_matching() {
   [ $# -gt 0 ] || return 0
-  if [ -z "${WS_DRY:-}" ] && ! app_running "$CHROME_APP"; then return 0; fi
+  if [ -z "${B_DRY:-}" ] && ! app_running "$CHROME_APP"; then return 0; fi
   log "chrome: closing tabs matching $*"
   osa 'on run argv
   tell application "Google Chrome"
@@ -138,12 +138,12 @@ vlc_play() {
   local src start=${2:-0}
   src=$(expand "$1")
   [ -n "$src" ] || { log "vlc: nothing to play (queue empty?)"; return 0; }
-  if [ -z "${WS_DRY:-}" ] && [ ! -x "$VLC_BIN" ]; then
+  if [ -z "${B_DRY:-}" ] && [ ! -x "$VLC_BIN" ]; then
     log "VLC not found at $VLC_BIN; opening in default app instead"
     run open "$src"; return 0
   fi
   log "vlc: $src"
-  if [ -n "${WS_DRY:-}" ]; then
+  if [ -n "${B_DRY:-}" ]; then
     run "$VLC_BIN" --start-time="$start" "$src"
   else
     nohup "$VLC_BIN" --start-time="$start" "$src" >/dev/null 2>&1 &
@@ -152,7 +152,7 @@ vlc_play() {
 }
 
 # --- queues: "what do I watch next" ----------------------------------------
-# queues/NAME.txt: one item per line, top = next. `ws next NAME` marks the
+# queues/NAME.txt: one item per line, top = next. `b next NAME` marks the
 # top item done (moves it to queues/NAME.done.txt with a date).
 
 queue_next() {
@@ -206,14 +206,14 @@ end run' "$title" "$stamp"
 
 # aero_workspace NAME: jump to an AeroSpace workspace so new windows land there
 aero_workspace() {
-  if [ -z "${WS_DRY:-}" ] && ! has aerospace; then log "aerospace not installed, skipping"; return 0; fi
+  if [ -z "${B_DRY:-}" ] && ! has aerospace; then log "aerospace not installed, skipping"; return 0; fi
   log "aerospace workspace $1"
   run aerospace workspace "$1"
 }
 
 # aero_layout LAYOUT...: e.g. `aero_layout tiles horizontal` on focused window
 aero_layout() {
-  if [ -z "${WS_DRY:-}" ] && ! has aerospace; then return 0; fi
+  if [ -z "${B_DRY:-}" ] && ! has aerospace; then return 0; fi
   run aerospace layout "$@"
 }
 
@@ -224,7 +224,7 @@ aero_layout() {
 focus_on()  { _shortcut "$FOCUS_ON_SHORTCUT"; }
 focus_off() { _shortcut "$FOCUS_OFF_SHORTCUT"; }
 _shortcut() {
-  if [ -z "${WS_DRY:-}" ] && ! shortcuts list 2>/dev/null | grep -qx "$1"; then
+  if [ -z "${B_DRY:-}" ] && ! shortcuts list 2>/dev/null | grep -qx "$1"; then
     log "no Shortcut named \"$1\" (see README), skipping"; return 0
   fi
   log "shortcut: $1"
