@@ -20,7 +20,7 @@ done
 out=$("$b" s karpathy 2>&1)
 grep -q 'VMj-3S1tku0' <<<"$out"         || { echo "FAIL vlc queue"; exit 1; }
 grep -q -- '--new-window' <<<"$out"     || { echo "FAIL chrome"; exit 1; }
-grep -q 'working-directory=' <<<"$out"  || { echo "FAIL ghostty"; exit 1; }
+grep -q 'ghostty @ ' <<<"$out"          || { echo "FAIL ghostty"; exit 1; }
 
 # s makemore: id in the queue resolves to the local file, note gets its title
 mkdir -p "$tmp/videos"

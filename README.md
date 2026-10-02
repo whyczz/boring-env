@@ -87,7 +87,7 @@ yt-dlp -o '~/Videos/learn/%(title)s.%(ext)s' 'https://www.youtube.com/watch?v=VM
 
 ## Known quirks
 
-- `open -na Ghostty` starts a fresh Ghostty process per call (extra dock icon).
+- `term_at` needs Ghostty 1.3+ (AppleScript) to open a window in your running Ghostty. Older versions fall back to `open -na` with `--window-save-state=never`, which is a separate process (extra dock icon) but doesn't clone your saved windows.
   Harmless; if it bugs you, swap `term_at` for an AppleScript keystroke version.
 - Re-running `b s makemore` opens a second set of windows. Use `b down` first.
 - Alfred runs with a bare PATH; `b` adds `/opt/homebrew/bin` itself.

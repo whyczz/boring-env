@@ -84,18 +84,28 @@ end run' "$a"
 
 # --- terminal -------------------------------------------------------------
 
-# term_at DIR [CMD...]: new Ghostty window in DIR, optionally running CMD
-# (drops you into your shell after CMD exits).
+# term_at DIR [CMD...]: new Ghostty window in DIR, optionally typing CMD into
+# its shell (Ctrl-C leaves you at the prompt, CMD in history).
+# Asks the running Ghostty for a window over AppleScript (Ghostty 1.3+).
+# `open -na Ghostty` would start a second Ghostty process, and that one
+# restores every window from your saved session: a clone of all your terminals.
 term_at() {
   local dir; dir=$(expand "$1"); shift
   [ -n "${B_DRY:-}" ] || [ -d "$dir" ] || { log "creating $dir"; mkdir -p "$dir"; }
-  log "ghostty @ $dir"
-  if [ $# -gt 0 ]; then
-    run open -na "$GHOSTTY_APP" --args --working-directory="$dir" \
-      -e "${SHELL:-/bin/zsh}" -lc "$*; exec ${SHELL:-/bin/zsh} -l"
-  else
-    run open -na "$GHOSTTY_APP" --args --working-directory="$dir"
-  fi
+  log "ghostty @ $dir${1:+: $*}"
+  osa 'on run argv
+  tell application "Ghostty"
+    set cfg to new surface configuration
+    set initial working directory of cfg to item 1 of argv
+    if item 2 of argv is not "" then set initial input of cfg to (item 2 of argv) & linefeed
+    new window with configuration cfg
+    activate
+  end tell
+end run' "$dir" "$*" 2>/dev/null && { settle; return 0; }
+  # older Ghostty without AppleScript: separate process, but don't restore
+  log "ghostty AppleScript failed (need 1.3+); falling back to open -na"
+  run open -na "$GHOSTTY_APP" --args --window-save-state=never --working-directory="$dir" \
+    ${1:+-e "${SHELL:-/bin/zsh}" -lc "$*; exec ${SHELL:-/bin/zsh} -l"}
   settle
 }
 
