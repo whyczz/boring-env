@@ -5,7 +5,7 @@
 # focus_off, kill_distractions, osa (raw AppleScript). See lib/blocks.sh.
 
 up() {
-  aero_workspace __NAME__
+  aero_workspace "$LEARN_WS"   # or any letter you reach with alt-<letter>
   term_at ~/code/__NAME__
   chrome_window "https://example.com"
 }

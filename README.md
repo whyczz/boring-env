@@ -34,7 +34,7 @@ System Events". Click Allow once. That's the TCC tax.
 Optional bits (each block skips itself if missing):
 - **Focus mode**: in Shortcuts.app make `Focus On` (Set Focus → Do Not Disturb → On)
   and `Focus Off`. Names configurable in `local.sh`.
-- **AeroSpace**: `aero_workspace S` jumps there first so new windows land on it; `aero_pull S` after an app that already has a window elsewhere (VLC, Notes) drags it over.
+- **AeroSpace**: learn recipes go to workspace `S` (alt-s), set by `LEARN_WS` (override in `local.sh`). `aero_workspace "$LEARN_WS"` jumps there first so new windows land on it; `aero_pull "$LEARN_WS"` after an app that already has a window elsewhere (VLC, Notes) drags it over. Use a letter your AeroSpace config binds: the default config has no `alt-l` workspace (alt-l is focus right).
 
 ## Layout
 
