@@ -1,0 +1,7 @@
+# Top line = next up. `b next karpathy` marks it watched.
+# Local files (~/Videos/foo.mp4) are the most reliable in VLC; YouTube URLs
+# depend on VLC's youtube parser, which breaks now and then (see README).
+https://www.youtube.com/watch?v=VMj-3S1tku0  # micrograd: backprop spelled out
+https://www.youtube.com/watch?v=PaCmpygFfXo  # makemore 1: bigrams
+https://www.youtube.com/watch?v=kCc8FmEb1nY  # let's build GPT
+https://www.youtube.com/watch?v=zduSFxRajkE  # GPT tokenizer

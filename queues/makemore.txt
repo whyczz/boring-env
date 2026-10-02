@@ -1,0 +1,5 @@
+# Top line = next up. Entries are a YouTube id (matched against filenames in
+# VIDEO_DIR), a full path, or a URL. `b next makemore` marks the top one done.
+q8SA3rM6ckI  # makemore 4: Becoming a Backprop Ninja
+t3YJ5hKiMQ0  # makemore 5: Building a WaveNet
+l8pRSuU81PU  # Let's reproduce GPT-2 (124M)

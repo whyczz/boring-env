@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# b: one keystroke to a ready workspace.
+#
+#   b s makemore       bring up recipes/s/makemore.sh (same as `b up s makemore`)
+#   b down s makemore  tear it down
+#   b kill             quit distractions (distractions.txt)
+#   b next makemore    mark the top of queues/makemore.txt as watched
+#   b list             list recipes
+#   b new s NAME       scaffold recipes/s/NAME.sh from the template
+#   b edit s makemore  open a recipe in $EDITOR
+#   b alfred           Alfred Script Filter JSON (used by the workflow)
+#
+# B_DRY=1 b s makemore  print what would happen, touch nothing
+#
+# Recipes nest by folder: recipes/s/makemore.sh is `b s makemore`
+# (s = study). Words after the command are joined with / to find the file.
+set -euo pipefail
+
+# resolve the repo root even when b is symlinked into ~/.local/bin
+src=${BASH_SOURCE[0]}
+while [ -L "$src" ]; do
+  dir=$(cd -P "$(dirname "$src")" && pwd)
+  src=$(readlink "$src")
+  case $src in /*) ;; *) src=$dir/$src ;; esac
+done
+BORING_HOME=${BORING_HOME:-$(cd -P "$(dirname "$src")/.." && pwd)}
+export BORING_HOME
+
+# Alfred/launchd run with a bare PATH; add the usual brew spots
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+
+# shellcheck source=lib/blocks.sh
+. "$BORING_HOME/lib/blocks.sh"
+# optional per-machine overrides (CHROME_PROFILE, SETTLE, ...), gitignored
+# shellcheck disable=SC1091
+[ -f "$BORING_HOME/local.sh" ] && . "$BORING_HOME/local.sh"
+
+# rid WORD...: recipe id, words joined by / ("s makemore" -> "s/makemore")
+rid() { local IFS=/; printf '%s' "$*"; }
+
+# all recipe ids, sorted, template excluded
+recipe_ids() {
+  (cd "$BORING_HOME/recipes" && find . -name '*.sh' ! -name '_template.sh') |
+    sed -e 's|^\./||' -e 's|\.sh$||' | sort
+}
+
+recipe_file() {
+  local f="$BORING_HOME/recipes/$1.sh"
+  [ -f "$f" ] || die "no recipe '$1' (try: b list)"
+  printf '%s' "$f"
+}
+
+# load a recipe in a subshell-free way; it defines up() and optionally down()
+load() {
+  unset -f up down 2>/dev/null || true
+  # shellcheck disable=SC1090
+  . "$(recipe_file "$1")"
+  declare -F up >/dev/null || die "recipe '$1' has no up() function"
+}
+
+describe() { sed -n 's/^# *desc: *//p' "$1" | head -1; }
+
+cmd_up()   { load "$1"; log "up: $1"; up; log "ready. go learn something."; }
+cmd_down() {
+  load "$1"
+  if declare -F down >/dev/null; then log "down: $1"; down; else log "'$1' has no down()"; fi
+}
+
+cmd_list() {
+  local id
+  recipe_ids | while IFS= read -r id; do
+    printf '%-16s %s\n' "$(printf '%s' "$id" | tr / ' ')" "$(describe "$BORING_HOME/recipes/$id.sh")"
+  done
+}
+
+cmd_new() {
+  local f="$BORING_HOME/recipes/$1.sh"
+  [ -e "$f" ] && die "$f already exists"
+  mkdir -p "$(dirname "$f")"
+  sed "s|__NAME__|$(basename "$1")|g" "$BORING_HOME/recipes/_template.sh" > "$f"
+  log "created $f"
+  cmd_edit "$1"
+}
+
+cmd_edit() {
+  local f; f=$(recipe_file "$1")
+  # shellcheck disable=SC2086  # EDITOR may carry flags, e.g. "code -w"
+  run ${EDITOR:-open -t} "$f"
+}
+
+json_str() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+
+cmd_alfred() {
+  local id n d first=1
+  printf '{"items":['
+  for id in $(recipe_ids); do
+    n=$(printf '%s' "$id" | tr / ' ')
+    d=$(describe "$BORING_HOME/recipes/$id.sh")
+    [ $first -eq 1 ] || printf ','; first=0
+    printf '{"uid":"%s","title":"%s","subtitle":"%s","arg":"up %s","autocomplete":"%s",' \
+      "$(json_str "$n")" "$(json_str "$n")" "$(json_str "$d")" "$(json_str "$n")" "$(json_str "$n")"
+    printf '"mods":{"alt":{"arg":"down %s","subtitle":"tear down %s"}}}' "$(json_str "$n")" "$(json_str "$n")"
+  done
+  [ $first -eq 1 ] || printf ','
+  printf '{"uid":"kill","title":"kill","subtitle":"quit distractions","arg":"kill"}'
+  printf ']}\n'
+}
+
+main() {
+  local c=${1:-}; shift || true
+  case $c in
+    ""|-h|--help|help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//' ;;
+    up)     [ $# -ge 1 ] || die "usage: b up s NAME";   cmd_up "$(rid "$@")" ;;
+    down)   [ $# -ge 1 ] || die "usage: b down s NAME"; cmd_down "$(rid "$@")" ;;
+    kill)   kill_distractions ;;
+    next)   [ $# -ge 1 ] || die "usage: b next QUEUE"; queue_done "$1" ;;
+    list|ls) cmd_list ;;
+    new)    [ $# -ge 1 ] || die "usage: b new s NAME";  cmd_new "$(rid "$@")" ;;
+    edit)   [ $# -ge 1 ] || die "usage: b edit s NAME"; cmd_edit "$(rid "$@")" ;;
+    alfred) cmd_alfred ;;
+    *)      cmd_up "$(rid "$c" "$@")" ;;
+  esac
+}
+
+main "$@"

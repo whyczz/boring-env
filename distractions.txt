@@ -1,0 +1,9 @@
+# b kill / kill_distractions reads this.
+# app:NAME  quits the app     tab:TEXT  closes Chrome tabs whose URL contains TEXT
+app:Slack
+app:Discord
+app:Messages
+tab:x.com
+tab:twitter.com
+tab:reddit.com
+tab:news.ycombinator.com

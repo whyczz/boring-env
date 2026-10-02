@@ -1,0 +1,6 @@
+# Copy to local.sh (gitignored) for per-machine overrides.
+# CHROME_PROFILE="Profile 1"     # chrome://version -> "Profile Path" last part
+# SETTLE=0.8                     # slower Mac? give windows more time
+# FOCUS_ON_SHORTCUT="Focus On"
+# FOCUS_OFF_SHORTCUT="Focus Off"
+# VLC_BIN=/Applications/VLC.app/Contents/MacOS/VLC

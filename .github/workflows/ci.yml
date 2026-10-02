@@ -1,0 +1,16 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: shellcheck -x bin/b lib/blocks.sh recipes/*.sh recipes/*/*.sh test/smoke.sh alfred/build.sh
+      - run: test/smoke.sh
+  macos-bash32:
+    # macOS ships bash 3.2; make sure nothing newer snuck in
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: /bin/bash --version | head -1
+      - run: env PATH=/bin:/usr/bin:/usr/sbin /bin/bash test/smoke.sh
