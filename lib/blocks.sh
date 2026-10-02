@@ -14,7 +14,7 @@
 : "${FOCUS_ON_SHORTCUT:=Focus On}"          # names of Apple Shortcuts you create
 : "${FOCUS_OFF_SHORTCUT:=Focus Off}"
 : "${SETTLE:=0.4}"                          # seconds to let a window appear
-: "${LEARN_WS:=S}"                          # AeroSpace workspace for learn recipes (alt-s)
+: "${STUDY_WS:=S}"                          # AeroSpace workspace for study recipes (alt-s)
 
 # --- plumbing -------------------------------------------------------------
 
