@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: shellcheck -x bin/b lib/blocks.sh setups/*.sh test/smoke.sh
+      - run: shellcheck -x bin/b lib/blocks.sh setups/*.sh test/smoke.sh alfred/build.sh
       - run: test/smoke.sh
   macos-bash32:
     # macOS ships bash 3.2; make sure nothing newer snuck in

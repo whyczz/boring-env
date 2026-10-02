@@ -23,6 +23,7 @@ b kill         # just nuke distractions
 git clone https://github.com/whyczz/boring-env ~/code/boring-env
 ln -s ~/code/boring-env/bin/b ~/.local/bin/b     # or anywhere on PATH
 B_DRY=1 b learn                                  # dry run: prints, opens nothing
+~/code/boring-env/alfred/build.sh                # install Alfred workflow (`b` keyword, ⌃⌥L)
 b learn                                           # the real thing
 ```
 
@@ -45,7 +46,7 @@ Optional bits (each block skips itself if missing):
 | `queues/*.txt` | "what's next" lists, top line plays next |
 | `distractions.txt` | `app:Slack`, `tab:x.com` lines for `b kill` |
 | `local.sh` | per-machine overrides, gitignored (see `local.sh.example`) |
-| `alfred/` | how to wire Alfred |
+| `alfred/` | `build.sh` generates + installs the Alfred workflow |
 
 ## Blocks
 

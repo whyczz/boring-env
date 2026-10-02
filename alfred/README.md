@@ -1,24 +1,22 @@
 # Alfred wiring (Powerpack)
 
-Alfred → Settings → Workflows → `+` → Blank Workflow, name it `boring-env`.
+No GUI clicking. The workflow is generated from `info.plist.template`:
 
-## 1. Keyword picker: type `b`, pick a setup
+```sh
+alfred/build.sh      # builds boring-env.alfredworkflow for this checkout and opens it
+```
 
-1. Add **Inputs → Script Filter**
-   - Keyword: `b`, "Argument Optional"
-   - Language: `/bin/bash`
-   - Script: `~/code/boring-env/bin/b alfred`
-   - Tick "Alfred filters results"
-2. Add **Actions → Run Script**, connect the Script Filter to it
-   - Language: `/bin/bash`, input: **with input as argv**
-   - Script: `~/code/boring-env/bin/b $1 >/tmp/b.log 2>&1`
-     (`$1` is unquoted on purpose: the arg is `up learn` and must split)
+Alfred pops an import dialog. Hit Import and you're done.
 
-Enter runs `up`. Hold ⌥ (alt) and Enter runs `down`. Last row is `kill`.
+What you get:
+- **`b` keyword**: lists your setups (from `b alfred`). Enter runs `up`,
+  ⌥+Enter runs `down`, and the last row is `kill`.
+- **⌃⌥L hotkey**: `b learn`, no typing at all.
 
-## 2. True one keystroke
+Moved the repo or added hotkeys? Edit the template and re-run `build.sh`.
+Re-importing replaces the old copy, because the bundle id stays the same.
+Logs go to `/tmp/b.log`.
 
-Add **Triggers → Hotkey** (e.g. ⌃⌥L) → **Run Script**:
-`~/code/boring-env/bin/b learn >/tmp/b.log 2>&1`
-
-Something didn't open? `cat /tmp/b.log`.
+Sidebar: the hotkey keycode lives in the template (`hotkey` 37 = L,
+`hotmod` 786432 = ⌃⌥). If ⌃⌥L clashes with AeroSpace, change it there,
+or rebind it once in Alfred's UI (that change survives until you re-import).

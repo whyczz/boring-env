@@ -29,4 +29,11 @@ BORING_HOME="$tmp/r" "$tmp/r/bin/b" next karpathy 2>/dev/null
 grep -q 'PaCmpygFfXo' <(BORING_HOME="$tmp/r" bash -c '. "$BORING_HOME/lib/blocks.sh"; queue_next karpathy')
 grep -q 'VMj-3S1tku0' "$tmp/r/queues/karpathy.done.txt"
 
+# alfred workflow builds and points at this checkout's bin/b
+if command -v zip >/dev/null; then
+  "$root/alfred/build.sh" --no-open >/dev/null
+  unzip -p "$root/boring-env.alfredworkflow" info.plist | grep -q "$root/bin/b"
+  rm -f "$root/boring-env.alfredworkflow"
+fi
+
 echo "smoke: ok"

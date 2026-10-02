@@ -1,3 +1,4 @@
 local.sh
 queues/*.done.txt
 .DS_Store
+*.alfredworkflow
