@@ -1,0 +1,90 @@
+# boring-env
+
+> be me
+> want to watch Karpathy
+> 30 seconds of opening Ghostty, Chrome, VLC, Notes
+> "eh, tomorrow"
+> never
+
+One keystroke to a ready workspace. Plain bash + AppleScript, stock macOS,
+zero required deps. The hard part of a habit is starting; this deletes it.
+
+```
+ws learn        # Ghostty in ~/code/learn, Chrome tabs, next lecture in VLC,
+                # Apple Note stamped with today, Slack/X gone, Focus on
+ws down learn   # tear down
+ws next karpathy  # mark the lecture watched; next run plays the next one
+ws kill         # just nuke distractions
+```
+
+## Install (2 min)
+
+```sh
+git clone https://github.com/whyczz/boring-env ~/code/boring-env
+ln -s ~/code/boring-env/bin/ws ~/.local/bin/ws     # or anywhere on PATH
+WS_DRY=1 ws learn                                  # dry run: prints, opens nothing
+ws learn                                           # the real thing
+```
+
+First real run: macOS asks "allow Terminal/Alfred to control Notes / Chrome /
+System Events". Click Allow once. That's the TCC tax.
+
+Optional bits (each block skips itself if missing):
+- **Focus mode**: in Shortcuts.app make `Focus On` (Set Focus → Do Not Disturb → On)
+  and `Focus Off`. Names configurable in `local.sh`.
+- **AeroSpace**: `aero_workspace L` jumps there first so new windows land on it.
+
+## Layout
+
+| path | what |
+|---|---|
+| `bin/ws` | the CLI |
+| `lib/blocks.sh` | the Lego: one function per action |
+| `setups/*.sh` | one file per workspace, each defines `up()` / `down()` |
+| `sessions/*.txt` | Chrome tab lists, one URL per line (Session Buddy replacement) |
+| `queues/*.txt` | "what's next" lists, top line plays next |
+| `distractions.txt` | `app:Slack`, `tab:x.com` lines for `ws kill` |
+| `local.sh` | per-machine overrides, gitignored (see `local.sh.example`) |
+| `alfred/` | how to wire Alfred |
+
+## Blocks
+
+| block | does |
+|---|---|
+| `term_at DIR [CMD]` | new Ghostty window in DIR, optionally runs CMD |
+| `chrome_window URL...` | new Chrome window with those tabs |
+| `chrome_session NAME` | `sessions/NAME.txt` as a window |
+| `chrome_close_matching TEXT...` | close tabs whose URL contains TEXT |
+| `vlc_play SRC [START_SEC]` | play file/URL in VLC |
+| `queue_next NAME` | print top of `queues/NAME.txt` |
+| `notes_open TITLE [--stamp]` | show Apple Note (create if missing), optionally add a dated heading |
+| `app_open APP` / `app_quit APP...` | launch / politely quit |
+| `aero_workspace NAME`, `aero_layout ...` | AeroSpace |
+| `focus_on` / `focus_off` | run your Focus Shortcuts |
+| `kill_distractions` | apply `distractions.txt` |
+| `osa 'SCRIPT' ARGS...` | raw AppleScript escape hatch (`on run argv`) |
+
+New workspace: `ws new deepwork` copies `setups/_template.sh` and opens it.
+
+## Sidebar: VLC + YouTube
+
+VLC plays YouTube URLs through a Lua script that breaks whenever YouTube
+changes things. If a URL won't play: update VLC, or download once and queue
+the local file (VLC also remembers where you stopped in local files):
+
+```sh
+brew install yt-dlp
+yt-dlp -o '~/Videos/learn/%(title)s.%(ext)s' 'https://www.youtube.com/watch?v=VMj-3S1tku0'
+```
+
+## Known quirks
+
+- `open -na Ghostty` starts a fresh Ghostty process per call (extra dock icon).
+  Harmless; if it bugs you, swap `term_at` for an AppleScript keystroke version.
+- Re-running `ws learn` opens a second set of windows. Use `ws down` first.
+- Alfred runs with a bare PATH; `ws` adds `/opt/homebrew/bin` itself.
+
+## Test
+
+`test/smoke.sh` dry-runs every setup and checks the CLI. CI runs it on Linux
+and on macOS's ancient bash 3.2.

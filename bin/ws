@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# ws: one keystroke to a ready workspace.
+#
+#   ws learn            bring up setups/learn.sh (same as `ws up learn`)
+#   ws down learn       tear it down
+#   ws kill             quit distractions (distractions.txt)
+#   ws next karpathy    mark the top of queues/karpathy.txt as watched
+#   ws list             list setups
+#   ws new NAME         scaffold setups/NAME.sh from the template
+#   ws edit NAME        open a setup in $EDITOR
+#   ws alfred           Alfred Script Filter JSON (used by the workflow)
+#
+# WS_DRY=1 ws learn     print what would happen, touch nothing
+set -euo pipefail
+
+# resolve the repo root even when ws is symlinked into ~/.local/bin
+src=${BASH_SOURCE[0]}
+while [ -L "$src" ]; do
+  dir=$(cd -P "$(dirname "$src")" && pwd)
+  src=$(readlink "$src")
+  case $src in /*) ;; *) src=$dir/$src ;; esac
+done
+BORING_HOME=${BORING_HOME:-$(cd -P "$(dirname "$src")/.." && pwd)}
+export BORING_HOME
+
+# Alfred/launchd run with a bare PATH; add the usual brew spots
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+
+# shellcheck source=lib/blocks.sh
+. "$BORING_HOME/lib/blocks.sh"
+# optional per-machine overrides (CHROME_PROFILE, SETTLE, ...), gitignored
+# shellcheck disable=SC1091
+[ -f "$BORING_HOME/local.sh" ] && . "$BORING_HOME/local.sh"
+
+setup_file() {
+  local f="$BORING_HOME/setups/$1.sh"
+  [ -f "$f" ] || die "no setup '$1' (try: ws list)"
+  printf '%s' "$f"
+}
+
+# load a setup in a subshell-free way; it defines up() and optionally down()
+load() {
+  unset -f up down 2>/dev/null || true
+  # shellcheck disable=SC1090
+  . "$(setup_file "$1")"
+  declare -F up >/dev/null || die "setup '$1' has no up() function"
+}
+
+describe() { sed -n 's/^# *desc: *//p' "$1" | head -1; }
+
+cmd_up()   { load "$1"; log "up: $1"; up; log "ready. go learn something."; }
+cmd_down() {
+  load "$1"
+  if declare -F down >/dev/null; then log "down: $1"; down; else log "'$1' has no down()"; fi
+}
+
+cmd_list() {
+  local f n
+  for f in "$BORING_HOME"/setups/*.sh; do
+    [ -e "$f" ] || continue
+    n=$(basename "$f" .sh); [ "$n" = "_template" ] && continue
+    printf '%-12s %s\n' "$n" "$(describe "$f")"
+  done
+}
+
+cmd_new() {
+  local f="$BORING_HOME/setups/$1.sh"
+  [ -e "$f" ] && die "$f already exists"
+  sed "s/__NAME__/$1/g" "$BORING_HOME/setups/_template.sh" > "$f"
+  log "created $f"
+  cmd_edit "$1"
+}
+
+cmd_edit() {
+  local f; f=$(setup_file "$1")
+  # shellcheck disable=SC2086  # EDITOR may carry flags, e.g. "code -w"
+  run ${EDITOR:-open -t} "$f"
+}
+
+json_str() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+
+cmd_alfred() {
+  local f n d first=1
+  printf '{"items":['
+  for f in "$BORING_HOME"/setups/*.sh; do
+    [ -e "$f" ] || continue
+    n=$(basename "$f" .sh); [ "$n" = "_template" ] && continue
+    d=$(describe "$f")
+    [ $first -eq 1 ] || printf ','; first=0
+    printf '{"uid":"%s","title":"%s","subtitle":"%s","arg":"up %s","autocomplete":"%s",' \
+      "$(json_str "$n")" "$(json_str "$n")" "$(json_str "$d")" "$(json_str "$n")" "$(json_str "$n")"
+    printf '"mods":{"alt":{"arg":"down %s","subtitle":"tear down %s"}}}' "$(json_str "$n")" "$(json_str "$n")"
+  done
+  [ $first -eq 1 ] || printf ','
+  printf '{"uid":"kill","title":"kill","subtitle":"quit distractions","arg":"kill"}'
+  printf ']}\n'
+}
+
+main() {
+  local c=${1:-}; shift || true
+  case $c in
+    ""|-h|--help|help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
+    up)     [ $# -ge 1 ] || die "usage: ws up NAME";   cmd_up "$1" ;;
+    down)   [ $# -ge 1 ] || die "usage: ws down NAME"; cmd_down "$1" ;;
+    kill)   kill_distractions ;;
+    next)   [ $# -ge 1 ] || die "usage: ws next QUEUE"; queue_done "$1" ;;
+    list|ls) cmd_list ;;
+    new)    [ $# -ge 1 ] || die "usage: ws new NAME";  cmd_new "$1" ;;
+    edit)   [ $# -ge 1 ] || die "usage: ws edit NAME"; cmd_edit "$1" ;;
+    alfred) cmd_alfred ;;
+    *)      cmd_up "$c" ;;
+  esac
+}
+
+main "$@"
