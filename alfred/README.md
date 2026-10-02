@@ -9,9 +9,9 @@ alfred/build.sh      # builds boring-env.alfredworkflow for this checkout and op
 Alfred pops an import dialog. Hit Import and you're done.
 
 What you get:
-- **`b` keyword**: lists your setups (from `b alfred`). Enter runs `up`,
+- **`b` keyword**: lists your recipes (from `b alfred`). Enter runs `up`,
   ⌥+Enter runs `down`, and the last row is `kill`.
-- **⌃⌥L hotkey**: `b learn`, no typing at all.
+- **⌃⌥L hotkey**: `b l makemore`, no typing at all.
 
 Moved the repo or added hotkeys? Edit the template and re-run `build.sh`.
 Re-importing replaces the old copy, because the bundle id stays the same.

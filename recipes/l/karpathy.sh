@@ -1,6 +1,6 @@
 # desc: Karpathy lectures + code + Learning Log, distractions off
 # shellcheck shell=bash
-# A setup is plain bash. Define up() and (optionally) down() using blocks
+# A recipe is plain bash. Define up() and (optionally) down() using blocks
 # from lib/blocks.sh. Read top to bottom: that's the order things happen.
 
 LEARN_DIR=~/code/learn

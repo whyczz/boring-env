@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Dry-run smoke test: runs every setup with B_DRY=1 and checks the CLI.
+# Dry-run smoke test: runs every recipe with B_DRY=1 and checks the CLI.
 # Works on Linux CI and on your Mac without opening anything.
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -7,18 +7,30 @@ b="$root/bin/b"
 export B_DRY=1
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
-"$b" list | grep -q '^learn'
-for f in "$root"/setups/*.sh; do
-  n=$(basename "$f" .sh); [ "$n" = _template ] && continue
-  out=$("$b" up "$n" 2>&1); printf '%s\n' "$out" | grep -q '\[dry\]' || { echo "FAIL up $n"; exit 1; }
-  "$b" down "$n" >/dev/null 2>&1
+"$b" list | grep -q '^l makemore'
+for f in $(cd "$root/recipes" && find . -name '*.sh' ! -name '_template.sh'); do
+  words=$(printf '%s' "${f#./}" | sed 's/\.sh$//' | tr / ' ')
+  # shellcheck disable=SC2086  # split "l makemore" into words on purpose
+  out=$("$b" up $words 2>&1); grep -q '\[dry\]' <<<"$out" || { echo "FAIL up $words"; exit 1; }
+  # shellcheck disable=SC2086
+  "$b" down $words >/dev/null 2>&1
 done
 
-# learn specifics: the first queue item reaches VLC, the session reaches Chrome
-out=$("$b" learn 2>&1)
+# l karpathy: first queue item reaches VLC, the session reaches Chrome
+out=$("$b" l karpathy 2>&1)
 grep -q 'VMj-3S1tku0' <<<"$out"         || { echo "FAIL vlc queue"; exit 1; }
 grep -q -- '--new-window' <<<"$out"     || { echo "FAIL chrome"; exit 1; }
 grep -q 'working-directory=' <<<"$out"  || { echo "FAIL ghostty"; exit 1; }
+
+# l makemore: id in the queue resolves to the local file, note gets its title
+mkdir -p "$tmp/videos"
+touch "$tmp/videos/Building makemore Part 4： Becoming a Backprop Ninja [q8SA3rM6ckI].webm"
+out=$(cd "$root" && BORING_HOME="$root" bash -c '
+  . lib/blocks.sh; . recipes/l/makemore.sh; VIDEO_DIR='"'$tmp/videos'"'; up' 2>&1)
+grep -q 'Backprop Ninja \[q8SA3rM6ckI\].webm' <<<"$out"            || { echo "FAIL makemore video"; exit 1; }
+grep -q 'notes: Karpathy, Zero To Hero / Building makemore Part 4: Becoming a Backprop Ninja' <<<"$out" \
+  || { echo "FAIL makemore note"; exit 1; }
+grep -q 'jupyter lab' <<<"$out"                                    || { echo "FAIL makemore jupyter"; exit 1; }
 
 # alfred output is valid JSON
 "$b" alfred | python3 -m json.tool >/dev/null

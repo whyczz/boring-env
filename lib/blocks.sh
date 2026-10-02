@@ -1,10 +1,10 @@
 # shellcheck shell=bash
-# boring-env blocks: the Lego. Each block is one small function a setup calls.
+# boring-env blocks: the Lego. Each block is one small function a recipe calls.
 # Stock macOS only: bash 3.2, `open`, `osascript`. No yq, no brew deps
 # (aerospace and VLC are optional and skipped if missing).
 #
 # B_DRY=1 prints every side effect instead of doing it. Handy for testing
-# a setup without spawning 9 windows.
+# a recipe without spawning 9 windows.
 
 : "${BORING_HOME:?BORING_HOME not set (source via bin/b)}"
 : "${CHROME_APP:=Google Chrome}"
@@ -39,7 +39,7 @@ settle() { [ -n "${B_DRY:-}" ] || sleep "$SETTLE"; }
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
-# expand a leading ~ (setup files often say ~/code/x inside quotes)
+# expand a leading ~ (recipe files often say ~/code/x inside quotes)
 # shellcheck disable=SC2088  # matching a literal ~ on purpose
 expand() { case $1 in "~"|"~/"*) printf '%s%s' "$HOME" "${1#\~}" ;; *) printf '%s' "$1" ;; esac; }
 
@@ -151,6 +151,27 @@ vlc_play() {
   settle
 }
 
+# video_find KEY [DIR]: KEY is a path/URL (returned as is) or any piece of a
+# filename in DIR (default $VIDEO_DIR), e.g. a YouTube id like q8SA3rM6ckI.
+# Ids survive renames as long as the [id] stays in the name.
+video_find() {
+  local key dir=${2:-${VIDEO_DIR:-}} hit=""
+  key=$(expand "$1")
+  case $key in ""|*://*|/*) printf '%s' "$key"; return 0 ;; esac
+  [ -e "$key" ] && { printf '%s' "$key"; return 0; }
+  dir=$(expand "$dir")
+  [ -d "$dir" ] && hit=$(find "$dir" -maxdepth 2 -type f -name "*$key*" | sort | head -1)
+  if [ -n "$hit" ]; then printf '%s' "$hit"
+  else log "video_find: nothing matching '$key' in ${dir:-<no VIDEO_DIR>}"; printf '%s' "$key"
+  fi
+}
+
+# video_title FILE: "Building makemore Part 4： Becoming a Backprop Ninja [q8SA3rM6ckI].webm"
+#   -> "Building makemore Part 4: Becoming a Backprop Ninja"
+video_title() {
+  basename "$1" | sed -e 's/\.[A-Za-z0-9]*$//' -e 's/ \[[A-Za-z0-9_-]\{11\}\]$//' -e 's/：/:/g'
+}
+
 # --- queues: "what do I watch next" ----------------------------------------
 # queues/NAME.txt: one item per line, top = next. `b next NAME` marks the
 # top item done (moves it to queues/NAME.done.txt with a date).
@@ -176,19 +197,57 @@ queue_done() {
 
 # --- notes ----------------------------------------------------------------
 
-# notes_open TITLE [--stamp]: show the Apple Note TITLE (created if missing).
+# notes_open TITLE [--stamp] [--folder NAME]: show the Apple Note TITLE,
+# creating it if missing. --folder looks in (or creates in) that folder,
+# searched by name at any depth, so nested folders like
+# Scholar > Machine Learning > Karpathy just need the leaf name.
 # --stamp appends today's date as a heading so you start writing right away.
 notes_open() {
-  local title=$1 stamp=""
-  [ "${2:-}" = "--stamp" ] && stamp=$(date '+%a %F %H:%M')
-  log "notes: $title${stamp:+ (+$stamp)}"
-  osa 'on run argv
+  local title=$1 stamp="" folder=""
+  shift
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --stamp)  stamp=$(date '+%a %F %H:%M') ;;
+      --folder) folder=${2:-}; shift ;;
+      *) log "notes_open: ignoring '$1'" ;;
+    esac
+    shift
+  done
+  log "notes: ${folder:+$folder / }$title${stamp:+ (+$stamp)}"
+  osa 'on findFolder(fs, target)
+  tell application "Notes"
+    repeat with f in fs
+      if name of f is target then return f
+      set r to my findFolder(folders of f, target)
+      if r is not missing value then return r
+    end repeat
+  end tell
+  return missing value
+end findFolder
+
+on run argv
   set t to item 1 of argv
   set s to item 2 of argv
+  set fname to item 3 of argv
   tell application "Notes"
-    set hits to (notes whose name is t)
+    if fname is "" then
+      set hits to (notes whose name is t)
+      set dest to missing value
+    else
+      set dest to missing value
+      repeat with a in accounts
+        set dest to my findFolder(folders of a, fname)
+        if dest is not missing value then exit repeat
+      end repeat
+      if dest is missing value then set dest to make new folder with properties {name:fname}
+      set hits to (notes of dest whose name is t)
+    end if
     if (count of hits) is 0 then
-      set n to make new note with properties {name:t, body:"<h1>" & t & "</h1>"}
+      if dest is missing value then
+        set n to make new note with properties {body:"<h1>" & t & "</h1>"}
+      else
+        set n to make new note at dest with properties {body:"<h1>" & t & "</h1>"}
+      end if
     else
       set n to item 1 of hits
     end if
@@ -198,7 +257,7 @@ notes_open() {
     end try
     activate
   end tell
-end run' "$title" "$stamp"
+end run' "$title" "$stamp" "$folder"
   settle
 }
 

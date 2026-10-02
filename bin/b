@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 # b: one keystroke to a ready workspace.
 #
-#   b learn            bring up setups/learn.sh (same as `b up learn`)
-#   b down learn       tear it down
+#   b l makemore       bring up recipes/l/makemore.sh (same as `b up l makemore`)
+#   b down l makemore  tear it down
 #   b kill             quit distractions (distractions.txt)
-#   b next karpathy    mark the top of queues/karpathy.txt as watched
-#   b list             list setups
-#   b new NAME         scaffold setups/NAME.sh from the template
-#   b edit NAME        open a setup in $EDITOR
+#   b next makemore    mark the top of queues/makemore.txt as watched
+#   b list             list recipes
+#   b new l NAME       scaffold recipes/l/NAME.sh from the template
+#   b edit l makemore  open a recipe in $EDITOR
 #   b alfred           Alfred Script Filter JSON (used by the workflow)
 #
-# B_DRY=1 b learn     print what would happen, touch nothing
+# B_DRY=1 b l makemore  print what would happen, touch nothing
+#
+# Recipes nest by folder: recipes/l/makemore.sh is `b l makemore`
+# (l = learn). Words after the command are joined with / to find the file.
 set -euo pipefail
 
 # resolve the repo root even when b is symlinked into ~/.local/bin
@@ -32,18 +35,27 @@ PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 # shellcheck disable=SC1091
 [ -f "$BORING_HOME/local.sh" ] && . "$BORING_HOME/local.sh"
 
-setup_file() {
-  local f="$BORING_HOME/setups/$1.sh"
-  [ -f "$f" ] || die "no setup '$1' (try: b list)"
+# rid WORD...: recipe id, words joined by / ("l makemore" -> "l/makemore")
+rid() { local IFS=/; printf '%s' "$*"; }
+
+# all recipe ids, sorted, template excluded
+recipe_ids() {
+  (cd "$BORING_HOME/recipes" && find . -name '*.sh' ! -name '_template.sh') |
+    sed -e 's|^\./||' -e 's|\.sh$||' | sort
+}
+
+recipe_file() {
+  local f="$BORING_HOME/recipes/$1.sh"
+  [ -f "$f" ] || die "no recipe '$1' (try: b list)"
   printf '%s' "$f"
 }
 
-# load a setup in a subshell-free way; it defines up() and optionally down()
+# load a recipe in a subshell-free way; it defines up() and optionally down()
 load() {
   unset -f up down 2>/dev/null || true
   # shellcheck disable=SC1090
-  . "$(setup_file "$1")"
-  declare -F up >/dev/null || die "setup '$1' has no up() function"
+  . "$(recipe_file "$1")"
+  declare -F up >/dev/null || die "recipe '$1' has no up() function"
 }
 
 describe() { sed -n 's/^# *desc: *//p' "$1" | head -1; }
@@ -55,24 +67,23 @@ cmd_down() {
 }
 
 cmd_list() {
-  local f n
-  for f in "$BORING_HOME"/setups/*.sh; do
-    [ -e "$f" ] || continue
-    n=$(basename "$f" .sh); [ "$n" = "_template" ] && continue
-    printf '%-12s %s\n' "$n" "$(describe "$f")"
+  local id
+  recipe_ids | while IFS= read -r id; do
+    printf '%-16s %s\n' "$(printf '%s' "$id" | tr / ' ')" "$(describe "$BORING_HOME/recipes/$id.sh")"
   done
 }
 
 cmd_new() {
-  local f="$BORING_HOME/setups/$1.sh"
+  local f="$BORING_HOME/recipes/$1.sh"
   [ -e "$f" ] && die "$f already exists"
-  sed "s/__NAME__/$1/g" "$BORING_HOME/setups/_template.sh" > "$f"
+  mkdir -p "$(dirname "$f")"
+  sed "s|__NAME__|$(basename "$1")|g" "$BORING_HOME/recipes/_template.sh" > "$f"
   log "created $f"
   cmd_edit "$1"
 }
 
 cmd_edit() {
-  local f; f=$(setup_file "$1")
+  local f; f=$(recipe_file "$1")
   # shellcheck disable=SC2086  # EDITOR may carry flags, e.g. "code -w"
   run ${EDITOR:-open -t} "$f"
 }
@@ -80,12 +91,11 @@ cmd_edit() {
 json_str() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
 
 cmd_alfred() {
-  local f n d first=1
+  local id n d first=1
   printf '{"items":['
-  for f in "$BORING_HOME"/setups/*.sh; do
-    [ -e "$f" ] || continue
-    n=$(basename "$f" .sh); [ "$n" = "_template" ] && continue
-    d=$(describe "$f")
+  for id in $(recipe_ids); do
+    n=$(printf '%s' "$id" | tr / ' ')
+    d=$(describe "$BORING_HOME/recipes/$id.sh")
     [ $first -eq 1 ] || printf ','; first=0
     printf '{"uid":"%s","title":"%s","subtitle":"%s","arg":"up %s","autocomplete":"%s",' \
       "$(json_str "$n")" "$(json_str "$n")" "$(json_str "$d")" "$(json_str "$n")" "$(json_str "$n")"
@@ -99,16 +109,16 @@ cmd_alfred() {
 main() {
   local c=${1:-}; shift || true
   case $c in
-    ""|-h|--help|help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
-    up)     [ $# -ge 1 ] || die "usage: b up NAME";   cmd_up "$1" ;;
-    down)   [ $# -ge 1 ] || die "usage: b down NAME"; cmd_down "$1" ;;
+    ""|-h|--help|help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//' ;;
+    up)     [ $# -ge 1 ] || die "usage: b up l NAME";   cmd_up "$(rid "$@")" ;;
+    down)   [ $# -ge 1 ] || die "usage: b down l NAME"; cmd_down "$(rid "$@")" ;;
     kill)   kill_distractions ;;
     next)   [ $# -ge 1 ] || die "usage: b next QUEUE"; queue_done "$1" ;;
     list|ls) cmd_list ;;
-    new)    [ $# -ge 1 ] || die "usage: b new NAME";  cmd_new "$1" ;;
-    edit)   [ $# -ge 1 ] || die "usage: b edit NAME"; cmd_edit "$1" ;;
+    new)    [ $# -ge 1 ] || die "usage: b new l NAME";  cmd_new "$(rid "$@")" ;;
+    edit)   [ $# -ge 1 ] || die "usage: b edit l NAME"; cmd_edit "$(rid "$@")" ;;
     alfred) cmd_alfred ;;
-    *)      cmd_up "$c" ;;
+    *)      cmd_up "$(rid "$c" "$@")" ;;
   esac
 }
 

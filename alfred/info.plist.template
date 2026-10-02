@@ -112,7 +112,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string># arg is e.g. "up learn"; $1 unquoted on purpose so it splits
+				<string># arg is e.g. "up l makemore"; $1 unquoted on purpose so it splits
 "__BIN__" $1 &gt;/tmp/b.log 2&gt;&amp;1</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
@@ -167,7 +167,7 @@
 				<key>escaping</key>
 				<integer>102</integer>
 				<key>script</key>
-				<string>"__BIN__" learn &gt;/tmp/b.log 2&gt;&amp;1</string>
+				<string>"__BIN__" l makemore &gt;/tmp/b.log 2&gt;&amp;1</string>
 				<key>scriptargtype</key>
 				<integer>1</integer>
 				<key>scriptfile</key>
