@@ -1,0 +1,37 @@
+{
+  "_doc": "Where numbers come from. XBRL tags are tried in order; first one with data wins. {\"sum\": [...]} adds several specs. Prefix dei: for non us-gaap namespaces.",
+  "sec": {
+    "tickers": "https://www.sec.gov/files/company_tickers.json",
+    "facts": "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
+    "filings": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type=10-K"
+  },
+  "price": [
+    { "name": "yahoo", "url": "https://query1.finance.yahoo.com/v8/finance/chart/{TICKER}?range=1d&interval=1d", "json": ["chart", "result", 0, "meta", "regularMarketPrice"] },
+    { "name": "stooq", "url": "https://stooq.com/q/l/?s={ticker}.us&f=sd2t2ohlcv&h&e=csv", "csv": "Close" }
+  ],
+  "cache_hours": 12,
+  "flows": {
+    "revenue":          ["RevenueFromContractWithCustomerExcludingAssessedTax", "Revenues", "SalesRevenueNet", "RevenueFromContractWithCustomerIncludingAssessedTax"],
+    "gross_profit":     ["GrossProfit"],
+    "operating_income": ["OperatingIncomeLoss"],
+    "net_income":       ["NetIncomeLoss", "ProfitLoss"],
+    "rnd":              ["ResearchAndDevelopmentExpense", "ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost"],
+    "cfo":              ["NetCashProvidedByUsedInOperatingActivities", "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations"],
+    "capex":            ["PaymentsToAcquirePropertyPlantAndEquipment", "PaymentsToAcquireProductiveAssets"],
+    "da":               ["DepreciationDepletionAndAmortization", "DepreciationAndAmortization", "DepreciationAmortizationAndAccretionNet", "Depreciation"],
+    "sbc":              ["ShareBasedCompensation", "AllocatedShareBasedCompensationExpense"],
+    "diluted_shares":   ["WeightedAverageNumberOfDilutedSharesOutstanding"]
+  },
+  "instants": {
+    "cash":           ["CashAndCashEquivalentsAtCarryingValue", "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"],
+    "st_investments": ["ShortTermInvestments", "MarketableSecuritiesCurrent", "AvailableForSaleSecuritiesDebtSecuritiesCurrent"],
+    "debt": { "sum": [
+      ["LongTermDebtNoncurrent", "LongTermDebt"],
+      ["LongTermDebtCurrent", "DebtCurrent"],
+      ["ShortTermBorrowings"],
+      ["CommercialPaper"]
+    ] },
+    "equity": ["StockholdersEquity", "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"],
+    "shares": { "classes": ["dei:EntityCommonStockSharesOutstanding", "CommonStockSharesOutstanding"] }
+  }
+}

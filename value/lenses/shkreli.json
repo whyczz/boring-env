@@ -1,0 +1,130 @@
+{
+  "name": "Shkreli",
+  "about": "Model-first: build the revenue line, margins and share count from the filings, then check what the market is paying (EV/Sales, P/E, EV/EBIT) and how long the cash lasts. Biotech habit: compare net cash to market cap and count quarters of runway. Thresholds are our inference from his streams, not his published numbers.",
+  "dcf": {
+    "base": "fcf_minus_sbc",
+    "years": 5,
+    "growth": 0.08,
+    "discount": 0.1,
+    "terminal_multiple": 15
+  },
+  "multiple": {
+    "metric": "operating_income",
+    "target": 15
+  },
+  "columns": [
+    "ticker",
+    "name",
+    "price",
+    "market_cap",
+    "ev",
+    "revenue",
+    "revenue_growth",
+    "gross_margin",
+    "op_margin",
+    "net_margin",
+    "rnd_pct_rev",
+    "sbc_pct_rev",
+    "dilution",
+    "net_cash",
+    "net_cash_pct_mcap",
+    "runway_q",
+    "ev_sales",
+    "ev_ebit",
+    "pe",
+    "fcf_yield",
+    "dcf_value",
+    "dcf_upside",
+    "implied_growth",
+    "multiple_value",
+    "multiple_upside",
+    "score",
+    "flags"
+  ],
+  "rules": [
+    {
+      "metric": "revenue_growth",
+      "op": ">=",
+      "value": 0.2,
+      "points": 2,
+      "flag": "growing 20%+"
+    },
+    {
+      "metric": "revenue_growth",
+      "op": "<",
+      "value": 0,
+      "points": -2,
+      "flag": "shrinking top line"
+    },
+    {
+      "metric": "gross_margin",
+      "op": ">=",
+      "value": 0.6,
+      "points": 1,
+      "flag": "fat gross margin"
+    },
+    {
+      "metric": "op_margin",
+      "op": "<",
+      "value": 0,
+      "points": -1,
+      "flag": "op loss"
+    },
+    {
+      "metric": "dilution",
+      "op": ">",
+      "value": 0.05,
+      "points": -2,
+      "flag": "diluting 5%+/yr"
+    },
+    {
+      "metric": "sbc_pct_rev",
+      "op": ">",
+      "value": 0.15,
+      "points": -1,
+      "flag": "SBC eats 15%+ of rev"
+    },
+    {
+      "metric": "net_cash_pct_mcap",
+      "op": ">=",
+      "value": 0.5,
+      "points": 2,
+      "flag": "half the mcap is cash"
+    },
+    {
+      "metric": "runway_q",
+      "op": "<",
+      "value": 6,
+      "points": -3,
+      "flag": "<6 quarters of cash: raise coming"
+    },
+    {
+      "metric": "ev_sales",
+      "op": ">",
+      "value": 15,
+      "points": -1,
+      "flag": "priced for perfection (EV/S>15)"
+    },
+    {
+      "metric": "dcf_upside",
+      "op": ">=",
+      "value": 0.3,
+      "points": 2,
+      "flag": "DCF says 30%+ upside"
+    },
+    {
+      "metric": "dcf_upside",
+      "op": "<",
+      "value": -0.3,
+      "points": -2,
+      "flag": "DCF says 30%+ downside: short idea?"
+    },
+    {
+      "metric": "implied_growth",
+      "op": ">",
+      "value": 0.25,
+      "points": -1,
+      "flag": "price implies 25%+/yr growth for 5 yrs"
+    }
+  ]
+}

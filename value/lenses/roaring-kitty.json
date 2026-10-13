@@ -1,0 +1,107 @@
+{
+  "name": "Roaring Kitty",
+  "about": "Deep value: cheap on EV/EBITDA and FCF yield, a balance sheet that won't kill you, then a catalyst (short squeeze, turnaround, buyback). Short interest and catalysts aren't in SEC data, so add them as columns in your sheet. Thresholds are our inference from his spreadsheet videos.",
+  "dcf": {
+    "base": "fcf",
+    "years": 5,
+    "growth": 0.03,
+    "discount": 0.1,
+    "terminal_multiple": 10
+  },
+  "multiple": {
+    "metric": "ebitda",
+    "target": 8
+  },
+  "columns": [
+    "ticker",
+    "name",
+    "price",
+    "market_cap",
+    "ev",
+    "revenue",
+    "revenue_growth",
+    "ebitda",
+    "fcf",
+    "fcf_yield",
+    "ev_ebitda",
+    "ev_ebit",
+    "pe",
+    "pb",
+    "net_cash",
+    "net_cash_pct_mcap",
+    "debt_to_ebitda",
+    "dilution",
+    "dcf_value",
+    "dcf_upside",
+    "implied_growth",
+    "multiple_value",
+    "multiple_upside",
+    "score",
+    "flags"
+  ],
+  "rules": [
+    {
+      "metric": "ev_ebitda",
+      "op": "<",
+      "value": 6,
+      "points": 2,
+      "flag": "EV/EBITDA < 6"
+    },
+    {
+      "metric": "ev_ebitda",
+      "op": ">",
+      "value": 15,
+      "points": -1,
+      "flag": "not cheap (EV/EBITDA > 15)"
+    },
+    {
+      "metric": "fcf_yield",
+      "op": ">=",
+      "value": 0.1,
+      "points": 2,
+      "flag": "FCF yield 10%+"
+    },
+    {
+      "metric": "fcf_yield",
+      "op": "<",
+      "value": 0,
+      "points": -2,
+      "flag": "burning cash"
+    },
+    {
+      "metric": "pb",
+      "op": "<",
+      "value": 1,
+      "points": 1,
+      "flag": "below book"
+    },
+    {
+      "metric": "net_cash_pct_mcap",
+      "op": ">=",
+      "value": 0.3,
+      "points": 1,
+      "flag": "30%+ of mcap in net cash"
+    },
+    {
+      "metric": "debt_to_ebitda",
+      "op": ">",
+      "value": 4,
+      "points": -2,
+      "flag": "levered (debt/EBITDA > 4)"
+    },
+    {
+      "metric": "dilution",
+      "op": "<",
+      "value": -0.02,
+      "points": 1,
+      "flag": "buying back stock"
+    },
+    {
+      "metric": "multiple_upside",
+      "op": ">=",
+      "value": 0.5,
+      "points": 2,
+      "flag": "50%+ to an 8x EBITDA re-rate"
+    }
+  ]
+}
