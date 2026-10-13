@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Kitty Keys",
+  "version": "0.1.0",
+  "description": "Type a ticker, get every research tab you care about in one named group. Sites and presets are yours to edit.",
+  "permissions": ["tabs", "tabGroups", "contextMenus", "storage"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "omnibox": { "keyword": "k" },
+  "action": { "default_popup": "popup.html", "default_title": "Kitty Keys sessions" },
+  "options_page": "options.html",
+  "commands": {
+    "dossier-from-page": {
+      "suggested_key": { "default": "Alt+Shift+K" },
+      "description": "Open the default preset for the ticker on this page"
+    },
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Open sessions popup"
+    }
+  }
+}

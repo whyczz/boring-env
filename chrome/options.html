@@ -1,0 +1,26 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Kitty Keys settings</title>
+<link rel="stylesheet" href="ui.css">
+<style>body { max-width: 760px; margin: 0 auto; padding: 20px 16px; }</style>
+<h1>Kitty Keys settings</h1>
+<p class="muted">Sites, presets and the ticker pattern are all data. <code>{TICKER}</code> = upper case, <code>{ticker}</code> = lower case, <code>{q}</code> = as typed. Add <code>#element-id</code> to a URL to land scrolled. Preset names and site keys double as omnibox words: <code>k GME rk</code>, <code>k fv GME</code>.</p>
+<h2>Profiles</h2>
+<p class="muted">A profile is a ready-made set of sites and presets. Replace swaps your config for it; Merge adds its sites and presets to yours.</p>
+<ul id="profiles"></ul>
+<div class="row" style="margin-top:6px">
+  <label for="file" class="muted">Load your own profile (.json):</label>
+  <input type="file" id="file" accept=".json,application/json" style="width:auto">
+</div>
+<h2>Your config</h2>
+<textarea id="cfg" rows="28" spellcheck="false"></textarea>
+<div class="row" style="margin-top:8px">
+  <button id="save" class="primary">Save</button>
+  <button id="reset">Reset to Starter</button>
+  <span id="status" class="muted"></span>
+</div>
+<p class="err" id="errors"></p>
+<h2>Chrome site-search keywords (no extension needed)</h2>
+<p class="muted">Settings → Search engine → Manage search engines → Site search → Add. One line per site:</p>
+<pre id="keywords" class="muted" style="overflow-x:auto"></pre>
+<script type="module" src="options.js"></script>
