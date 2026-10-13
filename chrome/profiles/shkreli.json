@@ -1,0 +1,23 @@
+{
+  "name": "Shkreli",
+  "about": "Model-builder setup inferred from Martin Shkreli's public models repo (one workbook per ticker, rolled up into sector books): pull the filings and three statements you need to build or update a model, plus a lookup of his own model for the ticker. He hasn't published a browser routine, so the site list is an inference, not his.",
+  "source": "https://github.com/martinshkreli/models",
+  "defaultPreset": "model",
+  "tickerPattern": "^[A-Z][A-Z0-9.\\-]{0,9}$",
+  "groupColor": "purple",
+  "sites": {
+    "10k":  { "name": "SEC 10-K",                 "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=10-K" },
+    "10q":  { "name": "SEC 10-Q",                 "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=10-Q" },
+    "8k":   { "name": "SEC 8-K",                  "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=8-K" },
+    "is":   { "name": "Income statement",         "url": "https://stockanalysis.com/stocks/{ticker}/financials/?p=quarterly" },
+    "bs":   { "name": "Balance sheet",            "url": "https://stockanalysis.com/stocks/{ticker}/financials/balance-sheet/?p=quarterly" },
+    "cf":   { "name": "Cash flow",                "url": "https://stockanalysis.com/stocks/{ticker}/financials/cash-flow-statement/?p=quarterly" },
+    "est":  { "name": "Consensus estimates",      "url": "https://finance.yahoo.com/quote/{TICKER}/analysis" },
+    "own":  { "name": "Holders",                  "url": "https://finance.yahoo.com/quote/{TICKER}/holders" },
+    "mdl":  { "name": "Shkreli's model (GitHub)", "url": "https://github.com/search?q=repo%3Amartinshkreli%2Fmodels+{TICKER}&type=code" }
+  },
+  "presets": {
+    "model":   ["10k", "10q", "is", "bs", "cf", "est", "mdl"],
+    "filings": ["10k", "10q", "8k"]
+  }
+}

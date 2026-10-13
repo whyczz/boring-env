@@ -1,0 +1,27 @@
+{
+  "name": "Roaring Kitty",
+  "about": "Keith Gill's browser routine as shown in 'Roaring Kitty – Tools Part 2 of 3 (browser, websites)' (recorded 2020-06-23): type a ticker, open every site at once (his 'All' button), insider and 13F checks, and #anchor URLs that land scrolled. FINRA bonds is left out because its search can't be pre-filled from a URL.",
+  "source": "https://www.youtube.com/watch?v=x2CBcthRVKE",
+  "defaultPreset": "all",
+  "tickerPattern": "^[A-Z][A-Z0-9.\\-]{0,9}$",
+  "groupColor": "orange",
+  "sites": {
+    "sc":   { "name": "StockCharts",                "url": "https://stockcharts.com/sc3/ui/?s={TICKER}" },
+    "sc10": { "name": "StockCharts 10y monthly",    "url": "https://stockcharts.com/h-sc/ui?s={TICKER}&p=M&yr=10", "note": "SharpCharts period params, unverified" },
+    "oi":   { "name": "OpenInsider",                "url": "http://openinsider.com/{TICKER}" },
+    "ww":   { "name": "WhaleWisdom",                "url": "https://whalewisdom.com/stock/{ticker}" },
+    "sec":  { "name": "SEC all filings",            "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&owner=include&count=40#contentDiv", "note": "#contentDiv is the anchor RK used in 2020; EDGAR may have changed it" },
+    "def":  { "name": "SEC DEF 14A (ownership, pay)", "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=DEF+14A#contentDiv" },
+    "sk":   { "name": "Seeking Alpha",              "url": "https://seekingalpha.com/symbol/{TICKER}" },
+    "skt":  { "name": "Seeking Alpha transcripts",  "url": "https://seekingalpha.com/symbol/{TICKER}/earnings/transcripts" },
+    "x":    { "name": "X top",                      "url": "https://x.com/search?q=%24{TICKER}&f=top" },
+    "xl":   { "name": "X latest",                   "url": "https://x.com/search?q=%24{TICKER}&f=live" },
+    "md":   { "name": "Moody's",                    "url": "https://www.moodys.com/search?keyword={TICKER}" },
+    "ir":   { "name": "IR press releases (Google)", "url": "https://www.google.com/search?q={TICKER}+investor+relations+press+releases" }
+  },
+  "presets": {
+    "all":     ["sc", "oi", "ww", "def", "sk", "x", "md"],
+    "insider": ["oi", "ww"],
+    "dialed":  ["sec", "skt", "xl", "ir"]
+  }
+}

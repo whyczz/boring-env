@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="ui.css">
+<style>body { width: 340px; }</style>
+<h1>Kitty Keys</h1>
+<form id="go" class="row">
+  <input id="q" placeholder="GME, or GME rk" autofocus>
+  <button class="primary">Open</button>
+</form>
+<h2>Save tabs</h2>
+<div class="row">
+  <input id="name" placeholder="session name (defaults to group title)">
+  <button id="save">Save</button>
+</div>
+<p class="muted" id="scope"></p>
+<h2>Sessions</h2>
+<ul id="list"></ul>
+<p class="muted" id="empty" hidden>No saved sessions yet. Save the current tab group or window above.</p>
+<h2>Import a sessions/*.txt</h2>
+<textarea id="paste" rows="3" placeholder="paste one URL per line"></textarea>
+<div class="row"><input id="pasteName" placeholder="name"><button id="import">Import</button></div>
+<p class="err" id="msg"></p>
+<p class="muted">Type <code>k GME</code> in the address bar. <a href="options.html" target="_blank">Edit sites &amp; presets</a></p>
+<script type="module" src="popup.js"></script>

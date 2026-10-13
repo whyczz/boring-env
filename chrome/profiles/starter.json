@@ -1,0 +1,16 @@
+{
+  "name": "Starter",
+  "about": "A small neutral setup to edit into your own. {TICKER} = upper case, {ticker} = lower case, {q} = as typed. Anything after # lands the page scrolled to that element id.",
+  "defaultPreset": "quick",
+  "tickerPattern": "^[A-Z][A-Z0-9.\\-]{0,9}$",
+  "groupColor": "blue",
+  "sites": {
+    "fv":  { "name": "Finviz",        "url": "https://finviz.com/quote.ashx?t={TICKER}" },
+    "10k": { "name": "SEC 10-K",      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={TICKER}&type=10-K" },
+    "sa":  { "name": "StockAnalysis", "url": "https://stockanalysis.com/stocks/{ticker}/financials/" },
+    "oi":  { "name": "OpenInsider",   "url": "http://openinsider.com/{TICKER}" }
+  },
+  "presets": {
+    "quick": ["fv", "10k", "sa", "oi"]
+  }
+}
